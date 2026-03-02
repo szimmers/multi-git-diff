@@ -1,5 +1,9 @@
-import { useMemo } from 'react'
+import { useMemo, useEffect, useRef } from 'react'
 import { html as toDiffHtml } from 'diff2html'
+import hljs from 'highlight.js/lib/core'
+import jsonLang from 'highlight.js/lib/languages/json'
+
+hljs.registerLanguage('json', jsonLang)
 
 function relativeDate(ts) {
   const s = Date.now() / 1000 - ts
@@ -35,10 +39,21 @@ function BlameView({ lines }) {
 }
 
 export default function DiffViewer({ diff, selectedFile, onOpenAraxis, blameOn, blameData, onToggleBlame }) {
+  const diffRef = useRef(null)
+
   const diffHtml = useMemo(() => {
     if (!diff) return ''
     return toDiffHtml(diff, { drawFileList: false, matching: 'lines', outputFormat: 'line-by-line' })
   }, [diff])
+
+  useEffect(() => {
+    if (!diffRef.current || !selectedFile) return
+    const ext = selectedFile.path.split('.').pop()?.toLowerCase()
+    if (ext !== 'json') return
+    diffRef.current.querySelectorAll('.d2h-code-line-ctn').forEach(el => {
+      hljs.highlightElement(el)
+    })
+  }, [diffHtml, selectedFile])
 
   if (!selectedFile) {
     return (
@@ -70,7 +85,7 @@ export default function DiffViewer({ diff, selectedFile, onOpenAraxis, blameOn, 
       {blameOn
         ? <BlameView lines={blameData} />
         : diffHtml
-          ? <div className="diff-content" dangerouslySetInnerHTML={{ __html: diffHtml }} />
+          ? <div ref={diffRef} className="diff-content" dangerouslySetInnerHTML={{ __html: diffHtml }} />
           : <div className="diff-viewer diff-viewer--empty"><span className="diff-placeholder">No diff available</span></div>
       }
     </div>
