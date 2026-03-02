@@ -3,7 +3,8 @@ import { contextBridge, ipcRenderer } from 'electron'
 contextBridge.exposeInMainWorld('api', {
   getWorkspaces:   ()       => ipcRenderer.invoke('workspaces:get'),
   addWorkspace:    ()       => ipcRenderer.invoke('workspaces:add'),
-  removeWorkspace: (path)   => ipcRenderer.invoke('workspaces:remove', path),
+  removeWorkspace: (path)        => ipcRenderer.invoke('workspaces:remove', path),
+  setWorkspaces:   (workspaces)  => ipcRenderer.invoke('workspaces:set', workspaces),
   getStatus:   (repoPath)                    => ipcRenderer.invoke('git:status',     repoPath),
   getDiff:     (repoPath, filePath, staged, isUntracked) => ipcRenderer.invoke('git:diff', repoPath, filePath, staged, isUntracked),
   stage:       (repoPath, filePaths)         => ipcRenderer.invoke('git:stage',      repoPath, filePaths),

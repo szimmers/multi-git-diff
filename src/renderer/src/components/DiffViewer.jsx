@@ -15,7 +15,7 @@ function relativeDate(ts) {
   return `${Math.floor(s / (86400 * 365))}yr ago`
 }
 
-function BlameView({ lines }) {
+function BlameView({ lines, onHashClick }) {
   if (!lines.length) {
     return (
       <div className="diff-viewer diff-viewer--empty">
@@ -27,7 +27,7 @@ function BlameView({ lines }) {
     <div className="blame-view">
       {lines.map(line => (
         <div key={line.lineNum} className="blame-row" data-hash={line.hash}>
-          <span className="blame-hash" title={line.summary}>{line.hash}</span>
+          <span className="blame-hash" title={line.summary} onClick={() => onHashClick(line.hash, line.summary)}>{line.hash}</span>
           <span className="blame-author" title={line.author}>{line.author.slice(0, 16)}</span>
           <span className="blame-date">{relativeDate(line.time)}</span>
           <span className="blame-linenum">{line.lineNum}</span>
@@ -38,7 +38,19 @@ function BlameView({ lines }) {
   )
 }
 
-export default function DiffViewer({ diff, selectedFile, onOpenAraxis, blameOn, blameData, onToggleBlame }) {
+/**
+ * Renders either a diff2html diff or a git blame view for the selected file.
+ * JSON files get additional syntax highlighting via highlight.js.
+ * @param {object}   props
+ * @param {string}   props.diff
+ * @param {object|null} props.selectedFile
+ * @param {()=>void} props.onOpenAraxis
+ * @param {boolean}  props.blameOn
+ * @param {object[]} props.blameData   - parsed blame lines from parseBlame()
+ * @param {()=>void} props.onToggleBlame
+ * @param {(hash:string, summary:string)=>void} props.onBlameHashClick
+ */
+export default function DiffViewer({ diff, selectedFile, onOpenAraxis, blameOn, blameData, onToggleBlame, onBlameHashClick }) {
   const diffRef = useRef(null)
 
   const diffHtml = useMemo(() => {
@@ -83,7 +95,7 @@ export default function DiffViewer({ diff, selectedFile, onOpenAraxis, blameOn, 
       </div>
 
       {blameOn
-        ? <BlameView lines={blameData} />
+        ? <BlameView lines={blameData} onHashClick={onBlameHashClick} />
         : diffHtml
           ? <div ref={diffRef} className="diff-content" dangerouslySetInnerHTML={{ __html: diffHtml }} />
           : <div className="diff-viewer diff-viewer--empty"><span className="diff-placeholder">No diff available</span></div>

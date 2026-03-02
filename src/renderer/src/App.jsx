@@ -6,6 +6,11 @@ import CommitPanel from './components/CommitPanel'
 
 // ─── Blame parser ─────────────────────────────────────────────────────────────
 
+/**
+ * Parses `git blame --porcelain` output into per-line objects.
+ * @param {string} raw - porcelain blame output
+ * @returns {{ lineNum: number, hash: string, author: string, time: number, summary: string, content: string }[]}
+ */
 function parseBlame(raw) {
   const lines = []
   const meta  = {}
@@ -68,6 +73,12 @@ export default function App() {
     toastTimer.current = setTimeout(() => setToast(null), 3000)
   }, [])
 
+  /**
+   * Fetches and applies the latest git status for a repo.
+   * Also clears selectedFile if it no longer appears in staged or unstaged.
+   * @param {{ path: string }} repo
+   * @returns {Promise<object|null>} The new status object, or null if no repo.
+   */
   const refreshStatus = useCallback(async (repo) => {
     if (!repo) return null
     const s = await window.api.getStatus(repo.path)
@@ -149,7 +160,16 @@ export default function App() {
   }, [blameOn, selectedFile, activeRepo])
 
   // ─── Column resize ───────────────────────────────────────────────────────────
-  // Returns an onResizeStart(startX) handler that captures the current width
+
+  /**
+   * Factory that returns an onResizeStart(startX) mouse handler for a resizable column.
+   * currentWidth is captured at call time to avoid stale closure issues.
+   * @param {number} currentWidth - width at the moment the divider is grabbed
+   * @param {(w: number) => void} setWidth
+   * @param {number} min - minimum allowed width in px
+   * @param {number} max - maximum allowed width in px
+   * @returns {(startX: number) => void}
+   */
   const makeResizeStart = (currentWidth, setWidth, min, max) => (startX) => {
     const startW = currentWidth
     setIsResizing(true)
@@ -170,6 +190,16 @@ export default function App() {
     const updated = await window.api.removeWorkspace(path)
     setRepos(updated)
     setActiveRepo(prev => prev?.path !== path ? prev : updated[0] ?? null)
+  }, [])
+
+  const handleReorderRepos = useCallback((fromIndex, toIndex) => {
+    setRepos(prev => {
+      const updated = [...prev]
+      const [moved] = updated.splice(fromIndex, 1)
+      updated.splice(toIndex, 0, moved)
+      window.api.setWorkspaces(updated)
+      return updated
+    })
   }, [])
 
   // ─── Git action handlers ─────────────────────────────────────────────────────
@@ -231,6 +261,11 @@ export default function App() {
     } finally { setBusy(false) }
   }, [activeRepo, showToast, refreshStatus])
 
+  const handleBlameHashClick = useCallback((hash, summary) => {
+    navigator.clipboard.writeText(hash)
+    showToast('success', `Copied ${hash} — ${summary}`)
+  }, [showToast])
+
   const handleOpenAraxis = useCallback(async () => {
     if (!selectedFile) return
     const result = await window.api.openAraxis(activeRepo.path, selectedFile.path, selectedFile.isStaged)
@@ -250,6 +285,7 @@ export default function App() {
         onRefresh={() => refreshStatus(activeRepo)}
         onAddWorkspace={handleAddWorkspace}
         onRemoveWorkspace={handleRemoveWorkspace}
+        onReorder={handleReorderRepos}
         style={{ width: sidebarWidth }}
       />
 
@@ -278,6 +314,7 @@ export default function App() {
           blameOn={blameOn}
           blameData={blameData}
           onToggleBlame={() => setBlameOn(v => !v)}
+          onBlameHashClick={handleBlameHashClick}
         />
         <CommitPanel
           message={commitMessage}

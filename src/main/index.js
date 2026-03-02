@@ -10,10 +10,15 @@ const ARAXIS = '/Applications/Araxis Merge.app/Contents/Utilities/compare'
 
 // ─── Workspace persistence ────────────────────────────────────────────────────
 
+/** @returns {string} Absolute path to the workspaces JSON file in userData. */
 function workspacesFile() {
   return join(app.getPath('userData'), 'workspaces.json')
 }
 
+/**
+ * Reads persisted workspaces from disk.
+ * @returns {{ name: string, path: string }[]}
+ */
 function readWorkspaces() {
   const file = workspacesFile()
   if (!existsSync(file)) return []
@@ -24,6 +29,10 @@ function readWorkspaces() {
   }
 }
 
+/**
+ * Persists workspaces to disk.
+ * @param {{ name: string, path: string }[]} workspaces
+ */
 function writeWorkspaces(workspaces) {
   writeFileSync(workspacesFile(), JSON.stringify(workspaces, null, 2))
 }
@@ -65,6 +74,14 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
 
+// Close all chokidar watchers before Node tears down its event loop.
+// Without this, fsevents.node crashes with SIGABRT during shutdown because
+// its FSEvents instance is destroyed after libuv's mutex is already freed.
+app.on('before-quit', () => {
+  for (const watcher of watchers.values()) watcher.close()
+  watchers.clear()
+})
+
 // ─── IPC: Workspaces ─────────────────────────────────────────────────────────
 
 ipcMain.handle('workspaces:get', () => readWorkspaces())
@@ -89,6 +106,10 @@ ipcMain.handle('workspaces:remove', (_, path) => {
   const updated = readWorkspaces().filter(w => w.path !== path)
   writeWorkspaces(updated)
   return updated
+})
+
+ipcMain.handle('workspaces:set', (_, workspaces) => {
+  writeWorkspaces(workspaces)
 })
 
 // ─── IPC: Status ─────────────────────────────────────────────────────────────
@@ -128,6 +149,14 @@ ipcMain.handle('git:status', async (_, repoPath) => {
 
 // ─── IPC: Diff ───────────────────────────────────────────────────────────────
 
+/**
+ * Returns a unified diff string for a single file.
+ * For untracked files, synthesises a diff from the raw file content.
+ * @param {string} repoPath
+ * @param {string} filePath  - repo-relative path
+ * @param {boolean} staged   - true → diff HEAD vs index; false → diff index vs working tree
+ * @param {boolean} isUntracked
+ */
 ipcMain.handle('git:diff', async (_, repoPath, filePath, staged, isUntracked) => {
   try {
     const git = simpleGit(repoPath)
@@ -206,6 +235,13 @@ ipcMain.handle('git:push', async (_, repoPath) => {
 
 // ─── IPC: Open in Araxis ─────────────────────────────────────────────────────
 
+/**
+ * Writes temp files and launches Araxis Merge for a side-by-side diff.
+ * Staged: HEAD vs index. Unstaged: index (or HEAD) vs working tree.
+ * @param {string} repoPath
+ * @param {string} filePath - repo-relative path
+ * @param {boolean} staged
+ */
 ipcMain.handle('git:openAraxis', async (_, repoPath, filePath, staged) => {
   try {
     const git = simpleGit(repoPath)
@@ -248,6 +284,13 @@ ipcMain.handle('git:openAraxis', async (_, repoPath, filePath, staged) => {
 
 // ─── IPC: File context menu ───────────────────────────────────────────────────
 
+/**
+ * Shows a native context menu for a file.
+ * Resolves with 'gitignore' if the user chose that action, null if dismissed,
+ * or { error } on failure.
+ * @param {string} repoPath
+ * @param {string} filePath - repo-relative path
+ */
 ipcMain.handle('git:fileMenu', (_, repoPath, filePath) => {
   return new Promise(resolve => {
     const menu = Menu.buildFromTemplate([

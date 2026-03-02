@@ -99,7 +99,7 @@ body {
 
 .repo-item {
   padding: 8px 12px;
-  cursor: pointer;
+  cursor: grab;
   border-left: 3px solid transparent;
   transition: background 0.1s;
 }
@@ -107,6 +107,9 @@ body {
 .repo-item--active {
   background: var(--surface);
   border-left-color: var(--accent);
+}
+.repo-item--drag-over {
+  border-top: 2px solid var(--accent);
 }
 
 .repo-item__row {
@@ -493,7 +496,8 @@ body {
 }
 .blame-row:hover { background: rgba(0, 0, 0, 0.04); }
 
-.blame-hash   { width: 72px;  flex-shrink: 0; padding: 2px 8px; color: var(--accent);  font-size: 11px; background: var(--panel); border-right: 1px solid var(--border); }
+.blame-hash   { width: 72px;  flex-shrink: 0; padding: 2px 8px; color: var(--accent);  font-size: 11px; background: var(--panel); border-right: 1px solid var(--border); cursor: pointer; }
+.blame-hash:hover { text-decoration: underline; }
 .blame-author { width: 120px; flex-shrink: 0; padding: 2px 8px; color: var(--text);    font-size: 11px; background: var(--panel); border-right: 1px solid var(--border); overflow: hidden; text-overflow: ellipsis; }
 .blame-date   { width: 68px;  flex-shrink: 0; padding: 2px 8px; color: var(--subtext); font-size: 11px; background: var(--panel); border-right: 1px solid var(--border); }
 .blame-linenum{ width: 42px;  flex-shrink: 0; padding: 2px 8px; color: var(--subtext); font-size: 11px; background: var(--panel); border-right: 1px solid var(--border); text-align: right; }

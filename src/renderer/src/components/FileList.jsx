@@ -18,6 +18,21 @@ function FileItem({ file, isStaged, isSelected, onSelect, onAction, onContextMen
   )
 }
 
+/**
+ * Two-section file list: Staged (with Unstage All) and Unstaged (with Stage All).
+ * Right-click context menu is available on unstaged files only.
+ * @param {object}     props
+ * @param {object[]}   props.staged
+ * @param {object[]}   props.unstaged
+ * @param {object|null} props.selectedFile
+ * @param {(file:object)=>void} props.onSelectFile
+ * @param {(path:string)=>void} props.onStage
+ * @param {(path:string)=>void} props.onUnstage
+ * @param {()=>void}   props.onStageAll
+ * @param {()=>void}   props.onUnstageAll
+ * @param {(path:string)=>void} props.onFileMenu - triggered by right-click on unstaged files
+ * @param {object}     props.style - passed to the root element for resizable width
+ */
 export default function FileList({
   staged, unstaged, selectedFile,
   onSelectFile, onStage, onUnstage, onStageAll, onUnstageAll, onFileMenu, style,
