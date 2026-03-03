@@ -48,7 +48,7 @@ function FileItem({ file, isStaged, isSelected, onSelect, onAction, onContextMen
 export default function FileList({
   staged, unstaged, selectedFile,
   onSelectFile, onStage, onUnstage, onStageAll, onUnstageAll, onFileMenu,
-  stashSelection, onToggleStashSelect, onStash, onStageSelected, style,
+  stashSelection, onToggleStashSelect, onStash, onStageSelected, onClearSelection, style,
 }) {
   const selCount   = stashSelection?.size ?? 0
   const canStash   = selCount > 0 || staged.length > 0 || unstaged.length > 0
@@ -86,6 +86,9 @@ export default function FileList({
         <div className="file-section__header">
           <span>Unstaged <span className="count">({unstaged.length})</span></span>
           <div style={{ display: 'flex', gap: 4 }}>
+            {selCount > 0 && (
+              <button className="section-btn" onClick={onClearSelection} title="Clear selection">✕</button>
+            )}
             {canStash && (
               <button className="section-btn section-btn--stash" onClick={onStash}
                 title={selCount > 0 ? `Stash the ${selCount} checked file(s)` : 'Stash all staged and unstaged changes'}>

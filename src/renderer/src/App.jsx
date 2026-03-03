@@ -147,6 +147,8 @@ export default function App() {
     setDiff('')
     setBlameData([])
     setStashSelection(new Set())
+    setStashView(null)
+    setStashDiff('')
     refreshStatus(activeRepo)
     refreshStashList(activeRepo)
     window.api.watch(activeRepo.path)
@@ -328,6 +330,8 @@ export default function App() {
     } finally { setBusy(false) }
   }, [activeRepo, showToast, refreshStatus])
 
+  const handleClearSelection = useCallback(() => setStashSelection(new Set()), [])
+
   const handleToggleStashSelect = useCallback((filePath) => {
     setStashSelection(prev => {
       const next = new Set(prev)
@@ -395,6 +399,8 @@ export default function App() {
   const handleBlameHashClick = useCallback(async (hash, summary) => {
     const result = await window.api.gitShow(activeRepo.path, hash)
     if (!result?.ok) { showToast('error', result?.error || 'git show failed'); return }
+    setStashView(null)
+    setStashDiff('')
     setCommitDiff(result.raw)
     setCommitView({ hash, summary, filePath: selectedFile?.path })
   }, [activeRepo, selectedFile, showToast])
@@ -441,6 +447,7 @@ export default function App() {
         onToggleStashSelect={handleToggleStashSelect}
         onStash={handleStash}
         onStageSelected={handleStageSelected}
+        onClearSelection={handleClearSelection}
         style={{ width: filelistWidth }}
       />
 
