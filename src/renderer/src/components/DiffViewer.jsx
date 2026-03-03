@@ -44,8 +44,7 @@ function BlameView({ lines, onHashClick }) {
  * @param {object}   props
  * @param {string}   props.diff
  * @param {object|null} props.selectedFile
- * @param {boolean}  props.hasAraxis
- * @param {()=>void} props.onOpenAraxis
+ * @param {{ label: string, onClick: ()=>void }[]} props.externalButtons
  * @param {boolean}  props.blameOn
  * @param {object[]} props.blameData        - parsed blame lines from parseBlame()
  * @param {()=>void} props.onToggleBlame
@@ -55,7 +54,7 @@ function BlameView({ lines, onHashClick }) {
  * @param {()=>void} props.onClearCommitView
  */
 export default function DiffViewer({
-  diff, selectedFile, hasAraxis, onOpenAraxis,
+  diff, selectedFile, externalButtons = [],
   blameOn, blameData, onToggleBlame, onBlameHashClick,
   commitView, commitDiff, onClearCommitView,
   stashView, stashDiff, onClearStashView, onStashPop, busy,
@@ -168,7 +167,9 @@ export default function DiffViewer({
             Blame
           </button>
         )}
-        {hasAraxis && <button className="araxis-btn" onClick={onOpenAraxis}>Open in Araxis ↗</button>}
+        {externalButtons.map(btn => (
+          <button key={btn.label} className="araxis-btn" onClick={btn.onClick}>{btn.label}</button>
+        ))}
       </div>
 
       {blameOn

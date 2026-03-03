@@ -4,6 +4,7 @@ import FileList from './components/FileList'
 import DiffViewer from './components/DiffViewer'
 import CommitPanel from './components/CommitPanel'
 import ErrorModal from './components/ErrorModal'
+import SettingsModal from './components/SettingsModal'
 
 // ─── Blame parser ─────────────────────────────────────────────────────────────
 
@@ -70,7 +71,8 @@ export default function App() {
   const [stashList, setStashList]       = useState([])
   const [stashView, setStashView]       = useState(null)  // { ref, message }
   const [stashDiff, setStashDiff]       = useState('')
-  const [hasAraxis, setHasAraxis]       = useState(false)
+  const [settings, setSettings]         = useState({})
+  const [showSettings, setShowSettings] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(200)
   const [filelistWidth, setFilelistWidth] = useState(290)
   const [isResizing, setIsResizing]     = useState(false)
@@ -111,7 +113,7 @@ export default function App() {
     return s
   }, [])
 
-  useEffect(() => { window.api.hasAraxis().then(setHasAraxis) }, [])
+  useEffect(() => { window.api.getSettings().then(setSettings) }, [])
 
   // Load workspaces + seed branch info for all repos
   useEffect(() => {
@@ -414,6 +416,29 @@ export default function App() {
     if (result && !result.ok) showToast('error', result.error || 'Araxis launch failed')
   }, [activeRepo, selectedFile, showToast])
 
+  const handleOpenSublime = useCallback(async () => {
+    if (!selectedFile || !activeRepo) return
+    const result = await window.api.openSublime(activeRepo.path, selectedFile.path)
+    if (result && !result.ok) showToast('error', result.error || 'Sublime Text launch failed')
+  }, [activeRepo, selectedFile, showToast])
+
+  const handleOpenWebstorm = useCallback(async () => {
+    if (!selectedFile || !activeRepo) return
+    const result = await window.api.openWebstorm(activeRepo.path, selectedFile.path)
+    if (result && !result.ok) showToast('error', result.error || 'WebStorm launch failed')
+  }, [activeRepo, selectedFile, showToast])
+
+  const handleOpenSourcetree = useCallback(async () => {
+    if (!activeRepo) return
+    const result = await window.api.openSourcetree(activeRepo.path)
+    if (result && !result.ok) showToast('error', result.error || 'Sourcetree launch failed')
+  }, [activeRepo, showToast])
+
+  const handleSaveSettings = useCallback(async (enabled) => {
+    await window.api.setSettings(enabled)
+    window.api.getSettings().then(setSettings)
+  }, [])
+
   return (
     <div className={`app${isResizing ? ' is-resizing' : ''}`}>
       <div className="titlebar" />
@@ -431,6 +456,7 @@ export default function App() {
         onReorder={handleReorderRepos}
         stashList={stashList}
         onStashClick={handleStashClick}
+        onOpenSettings={() => setShowSettings(true)}
         style={{ width: sidebarWidth }}
       />
 
@@ -460,8 +486,12 @@ export default function App() {
         <DiffViewer
           diff={diff}
           selectedFile={selectedFile}
-          hasAraxis={hasAraxis}
-          onOpenAraxis={handleOpenAraxis}
+          externalButtons={[
+            settings.araxis?.installed     && settings.araxis?.enabled     && { label: 'Open in Araxis ↗',     onClick: handleOpenAraxis },
+            settings.sublime?.installed    && settings.sublime?.enabled    && { label: 'Open in Sublime ↗',    onClick: handleOpenSublime },
+            settings.webstorm?.installed   && settings.webstorm?.enabled   && { label: 'Open in WebStorm ↗',   onClick: handleOpenWebstorm },
+            settings.sourcetree?.installed && settings.sourcetree?.enabled && { label: 'Open in Sourcetree ↗', onClick: handleOpenSourcetree },
+          ].filter(Boolean)}
           blameOn={blameOn}
           blameData={blameData}
           onToggleBlame={() => setBlameOn(v => !v)}
@@ -489,6 +519,14 @@ export default function App() {
           hasRemote={!!status.tracking}
         />
       </div>
+
+      {showSettings && (
+        <SettingsModal
+          settings={settings}
+          onSave={handleSaveSettings}
+          onClose={() => setShowSettings(false)}
+        />
+      )}
     </div>
   )
 }

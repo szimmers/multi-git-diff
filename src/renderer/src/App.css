@@ -82,7 +82,7 @@ body {
   border: none;
   color: var(--subtext);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 17px;
   padding: 2px 5px;
   border-radius: 4px;
   line-height: 1;
@@ -158,6 +158,28 @@ body {
 
 .ahead  { font-size: 10px; font-weight: 600; color: var(--green); }
 .behind { font-size: 10px; font-weight: 600; color: var(--red); }
+
+/* ─── Sidebar footer ───────────────────────────────────────────────────────── */
+.sidebar__footer {
+  border-top: 1px solid var(--border);
+  padding: 6px 8px;
+  flex-shrink: 0;
+}
+
+.sidebar__settings-btn {
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--subtext);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.1s, background 0.1s;
+}
+.sidebar__settings-btn:hover { color: var(--accent); background: rgba(109, 40, 217, 0.08); }
 
 /* ─── Stash list (sidebar) ─────────────────────────────────────────────────── */
 .stash-section {
@@ -718,6 +740,51 @@ body {
 .modal-btn--copy:hover { border-color: var(--accent); color: var(--accent); }
 .modal-btn--close { background: var(--accent); color: #fff; }
 .modal-btn--close:hover { opacity: 0.85; }
+
+/* ─── Settings modal ───────────────────────────────────────────────────────── */
+.modal__title--neutral { color: var(--text); }
+
+.settings-list {
+  padding: 4px 0;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.settings-row:last-child { border-bottom: none; }
+
+.settings-row__info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.settings-row__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.settings-row__status {
+  font-size: 11px;
+  color: var(--subtext);
+}
+.settings-row__status--ok { color: var(--green); }
+
+.settings-row__toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--subtext);
+  cursor: pointer;
+  user-select: none;
+}
+.settings-row__toggle--disabled { opacity: 0.4; cursor: default; }
 
 /* ─── Scrollbars ───────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar              { width: 6px; height: 6px; }

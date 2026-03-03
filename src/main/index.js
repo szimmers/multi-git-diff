@@ -6,7 +6,10 @@ import { execFile } from 'child_process'
 import { simpleGit } from 'simple-git'
 import chokidar from 'chokidar'
 
-const ARAXIS = '/Applications/Araxis Merge.app/Contents/Utilities/compare'
+const ARAXIS     = '/Applications/Araxis Merge.app/Contents/Utilities/compare'
+const SUBLIME    = '/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl'
+const WEBSTORM   = '/Applications/WebStorm.app/Contents/MacOS/webstorm'
+const SOURCETREE = '/Applications/Sourcetree.app'
 
 // ─── Workspace persistence ────────────────────────────────────────────────────
 
@@ -35,6 +38,20 @@ function readWorkspaces() {
  */
 function writeWorkspaces(workspaces) {
   writeFileSync(workspacesFile(), JSON.stringify(workspaces, null, 2))
+}
+
+// ─── Settings persistence ─────────────────────────────────────────────────────
+
+function settingsFile() {
+  return join(app.getPath('userData'), 'settings.json')
+}
+
+function readSettings() {
+  try { return JSON.parse(readFileSync(settingsFile(), 'utf-8')) } catch { return {} }
+}
+
+function writeSettings(s) {
+  writeFileSync(settingsFile(), JSON.stringify(s, null, 2))
 }
 
 const watchers = new Map()
@@ -321,7 +338,17 @@ ipcMain.handle('git:stashPop', async (_, repoPath, ref) => {
 
 // ─── IPC: Open in Araxis ─────────────────────────────────────────────────────
 
-ipcMain.handle('git:hasAraxis', () => existsSync(ARAXIS))
+ipcMain.handle('settings:get', () => {
+  const saved = readSettings()
+  return {
+    araxis:     { label: 'Araxis Merge', installed: existsSync(ARAXIS),     enabled: saved.araxis     === true },
+    sublime:    { label: 'Sublime Text', installed: existsSync(SUBLIME),    enabled: saved.sublime    === true },
+    webstorm:   { label: 'WebStorm',     installed: existsSync(WEBSTORM),   enabled: saved.webstorm   === true },
+    sourcetree: { label: 'Sourcetree',   installed: existsSync(SOURCETREE), enabled: saved.sourcetree === true },
+  }
+})
+
+ipcMain.handle('settings:set', (_, enabled) => writeSettings(enabled))
 
 
 /**
@@ -369,6 +396,29 @@ ipcMain.handle('git:openAraxis', async (_, repoPath, filePath, staged) => {
   } catch (err) {
     return { ok: false, error: err.message }
   }
+})
+
+// ─── IPC: Open in Sublime Text ────────────────────────────────────────────────
+
+ipcMain.handle('git:openSublime', (_, repoPath, filePath) => {
+  execFile(SUBLIME, [join(repoPath, filePath)], err => {
+    if (err) console.error('Sublime launch error:', err.message)
+  })
+  return { ok: true }
+})
+
+ipcMain.handle('git:openWebstorm', (_, repoPath, filePath) => {
+  execFile(WEBSTORM, [join(repoPath, filePath)], err => {
+    if (err) console.error('WebStorm launch error:', err.message)
+  })
+  return { ok: true }
+})
+
+ipcMain.handle('git:openSourcetree', (_, repoPath) => {
+  execFile('/usr/bin/open', ['-a', 'Sourcetree', repoPath], err => {
+    if (err) console.error('Sourcetree launch error:', err.message)
+  })
+  return { ok: true }
 })
 
 // ─── IPC: File context menu ───────────────────────────────────────────────────

@@ -15,9 +15,10 @@ import { useState } from 'react'
  * @param {(fromIndex:number, toIndex:number)=>void} props.onReorder
  * @param {{ ref: string, message: string }[]} props.stashList
  * @param {(ref:string, message:string)=>void} props.onStashClick
+ * @param {()=>void}   props.onOpenSettings
  * @param {object}     props.style - passed to the root element for resizable width
  */
-export default function Sidebar({ repos, activeRepo, repoBranches, onSelectRepo, onRefresh, onAddWorkspace, onRemoveWorkspace, onReorder, stashList, onStashClick, style }) {
+export default function Sidebar({ repos, activeRepo, repoBranches, onSelectRepo, onRefresh, onAddWorkspace, onRemoveWorkspace, onReorder, stashList, onStashClick, onOpenSettings, style }) {
   const [dragIndex, setDragIndex]       = useState(null)
   const [dragOverIndex, setDragOverIndex] = useState(null)
 
@@ -75,6 +76,10 @@ export default function Sidebar({ repos, activeRepo, repoBranches, onSelectRepo,
           )
         })}
       </ul>
+
+      <div className="sidebar__footer">
+        <button className="sidebar__settings-btn" onClick={onOpenSettings} title="External app settings">⚙ Settings</button>
+      </div>
 
       {stashList.length > 0 && (
         <div className="stash-section">
