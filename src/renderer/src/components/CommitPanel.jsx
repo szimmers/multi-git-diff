@@ -1,21 +1,24 @@
 /**
- * Commit message input, Commit button, and Push button.
+ * Commit message input, Commit button, Push button, and Pull button.
  * @param {object} props
  * @param {string}   props.message
  * @param {(s:string)=>void} props.onMessageChange
  * @param {()=>void} props.onCommit
  * @param {()=>void} props.onPush
+ * @param {()=>void} props.onPull
  * @param {boolean}  props.busy        - disables all controls while a git op is in flight
  * @param {number}   props.stagedCount - number of staged files; shown on Commit button
  * @param {number}   props.ahead       - unpushed commits; shown on Push button
+ * @param {number}   props.behind      - unpulled commits; shown on Pull button
  * @param {boolean}  props.hasRemote   - whether the branch has a tracking remote
  */
 export default function CommitPanel({
-  message, onMessageChange, onCommit, onPush,
-  busy, stagedCount, ahead, hasRemote,
+  message, onMessageChange, onCommit, onPush, onPull,
+  busy, stagedCount, ahead, behind, hasRemote,
 }) {
   const canCommit = message.trim().length > 0 && stagedCount > 0 && !busy
   const canPush   = hasRemote && ahead > 0 && !busy
+  const canPull   = hasRemote && !busy
 
   const handleKeyDown = (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && canCommit) onCommit()
@@ -38,6 +41,9 @@ export default function CommitPanel({
         </button>
         <button className="btn btn--push" onClick={onPush} disabled={!canPush}>
           {busy ? '…' : `Push${ahead > 0 ? ` ↑${ahead}` : ''}`}
+        </button>
+        <button className="btn btn--pull" onClick={onPull} disabled={!canPull}>
+          {busy ? '…' : `Pull${behind > 0 ? ` ↓${behind}` : ''}`}
         </button>
       </div>
     </div>

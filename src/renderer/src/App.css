@@ -489,6 +489,8 @@ body {
 .btn--commit:hover:not(:disabled) { background: #3a8eef; }
 .btn--push   { background: var(--green); color: #fff; font-weight: 600; }
 .btn--push:hover:not(:disabled)   { background: #156830; }
+.btn--pull   { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.btn--pull:hover:not(:disabled)   { border-color: var(--accent); color: var(--accent); }
 
 /* ─── Toast ────────────────────────────────────────────────────────────────── */
 .toast {
@@ -568,6 +570,77 @@ body {
 .blame-btn:hover { color: var(--text); border-color: var(--subtext); }
 .blame-btn--active { background: var(--accent); border-color: var(--accent); color: #fff; }
 .blame-btn--active:hover { background: #3a8eef; }
+
+/* ─── Error modal ──────────────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 520px;
+  max-width: calc(100vw - 48px);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.modal__header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.modal__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--red);
+}
+
+.modal__body {
+  padding: 14px 16px;
+  font-family: 'SF Mono', 'Menlo', monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 320px;
+  overflow-y: auto;
+  background: var(--bg);
+}
+
+.modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.modal-btn {
+  border: none;
+  border-radius: 4px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.modal-btn--copy  { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.modal-btn--copy:hover { border-color: var(--accent); color: var(--accent); }
+.modal-btn--close { background: var(--accent); color: #fff; }
+.modal-btn--close:hover { opacity: 0.85; }
 
 /* ─── Scrollbars ───────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar              { width: 6px; height: 6px; }

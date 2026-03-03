@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar'
 import FileList from './components/FileList'
 import DiffViewer from './components/DiffViewer'
 import CommitPanel from './components/CommitPanel'
+import ErrorModal from './components/ErrorModal'
 
 // ─── Blame parser ─────────────────────────────────────────────────────────────
 
@@ -64,6 +65,7 @@ export default function App() {
   const [commitMessage, setCommitMessage] = useState('')
   const [busy, setBusy]                 = useState(false)
   const [toast, setToast]               = useState(null)
+  const [errorModal, setErrorModal]     = useState(null)  // string | null
   const [sidebarWidth, setSidebarWidth] = useState(200)
   const [filelistWidth, setFilelistWidth] = useState(290)
   const [isResizing, setIsResizing]     = useState(false)
@@ -267,8 +269,9 @@ export default function App() {
         setCommitView(null)
         setCommitDiff('')
         await refreshStatus(activeRepo)
+      } else {
+        setErrorModal(result.error)
       }
-      else showToast('error', result.error)
     } finally { setBusy(false) }
   }, [activeRepo, commitMessage, status.staged.length, showToast, refreshStatus])
 
@@ -282,7 +285,20 @@ export default function App() {
         setCommitDiff('')
         await refreshStatus(activeRepo)
       } else {
-        showToast('error', result.error)
+        setErrorModal(result.error)
+      }
+    } finally { setBusy(false) }
+  }, [activeRepo, showToast, refreshStatus])
+
+  const handlePull = useCallback(async () => {
+    setBusy(true)
+    try {
+      const result = await window.api.pull(activeRepo.path)
+      if (result.ok) {
+        showToast('success', 'Pulled from origin')
+        await refreshStatus(activeRepo)
+      } else {
+        setErrorModal(result.error)
       }
     } finally { setBusy(false) }
   }, [activeRepo, showToast, refreshStatus])
@@ -304,6 +320,7 @@ export default function App() {
     <div className={`app${isResizing ? ' is-resizing' : ''}`}>
       <div className="titlebar" />
       {toast && <div className={`toast toast--${toast.type}`}>{toast.message}</div>}
+      {errorModal && <ErrorModal message={errorModal} onClose={() => setErrorModal(null)} />}
 
       <Sidebar
         repos={repos}
@@ -352,9 +369,11 @@ export default function App() {
           onMessageChange={setCommitMessage}
           onCommit={handleCommit}
           onPush={handlePush}
+          onPull={handlePull}
           busy={busy}
           stagedCount={status.staged.length}
           ahead={status.ahead}
+          behind={status.behind}
           hasRemote={!!status.tracking}
         />
       </div>

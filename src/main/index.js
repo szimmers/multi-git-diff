@@ -233,6 +233,16 @@ ipcMain.handle('git:push', async (_, repoPath) => {
   }
 })
 
+ipcMain.handle('git:pull', async (_, repoPath) => {
+  try {
+    const git = simpleGit(repoPath)
+    const result = await git.pull()
+    return { ok: true, result }
+  } catch (err) {
+    return { ok: false, error: err.message }
+  }
+})
+
 // ─── IPC: Open in Araxis ─────────────────────────────────────────────────────
 
 /**

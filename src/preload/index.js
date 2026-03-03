@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld('api', {
   unstageAll:  (repoPath)                    => ipcRenderer.invoke('git:unstageAll', repoPath),
   commit:      (repoPath, message)           => ipcRenderer.invoke('git:commit',     repoPath, message),
   push:        (repoPath)                    => ipcRenderer.invoke('git:push',       repoPath),
+  pull:        (repoPath)                    => ipcRenderer.invoke('git:pull',       repoPath),
   openAraxis:  (repoPath, filePath, staged)  => ipcRenderer.invoke('git:openAraxis', repoPath, filePath, staged),
   getBlame:    (repoPath, filePath)          => ipcRenderer.invoke('git:blame',      repoPath, filePath),
   gitShow:     (repoPath, hash)             => ipcRenderer.invoke('git:show',       repoPath, hash),
