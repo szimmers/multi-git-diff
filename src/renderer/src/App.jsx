@@ -70,6 +70,7 @@ export default function App() {
   const [stashList, setStashList]       = useState([])
   const [stashView, setStashView]       = useState(null)  // { ref, message }
   const [stashDiff, setStashDiff]       = useState('')
+  const [hasAraxis, setHasAraxis]       = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(200)
   const [filelistWidth, setFilelistWidth] = useState(290)
   const [isResizing, setIsResizing]     = useState(false)
@@ -109,6 +110,8 @@ export default function App() {
     })
     return s
   }, [])
+
+  useEffect(() => { window.api.hasAraxis().then(setHasAraxis) }, [])
 
   // Load workspaces + seed branch info for all repos
   useEffect(() => {
@@ -457,6 +460,7 @@ export default function App() {
         <DiffViewer
           diff={diff}
           selectedFile={selectedFile}
+          hasAraxis={hasAraxis}
           onOpenAraxis={handleOpenAraxis}
           blameOn={blameOn}
           blameData={blameData}

@@ -19,6 +19,7 @@ contextBridge.exposeInMainWorld('api', {
   stashList:   (repoPath)                    => ipcRenderer.invoke('git:stashList',  repoPath),
   stashShow:   (repoPath, ref)               => ipcRenderer.invoke('git:stashShow',  repoPath, ref),
   stashPop:    (repoPath, ref)               => ipcRenderer.invoke('git:stashPop',   repoPath, ref),
+  hasAraxis:   ()                            => ipcRenderer.invoke('git:hasAraxis'),
   openAraxis:  (repoPath, filePath, staged)  => ipcRenderer.invoke('git:openAraxis', repoPath, filePath, staged),
   getBlame:    (repoPath, filePath)          => ipcRenderer.invoke('git:blame',      repoPath, filePath),
   gitShow:     (repoPath, hash)             => ipcRenderer.invoke('git:show',       repoPath, hash),

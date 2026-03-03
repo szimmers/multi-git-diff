@@ -321,6 +321,9 @@ ipcMain.handle('git:stashPop', async (_, repoPath, ref) => {
 
 // ─── IPC: Open in Araxis ─────────────────────────────────────────────────────
 
+ipcMain.handle('git:hasAraxis', () => existsSync(ARAXIS))
+
+
 /**
  * Writes temp files and launches Araxis Merge for a side-by-side diff.
  * Staged: HEAD vs index. Unstaged: index (or HEAD) vs working tree.
