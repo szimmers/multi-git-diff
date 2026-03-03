@@ -13,12 +13,13 @@
  * @param {boolean}  props.hasRemote   - whether the branch has a tracking remote
  */
 export default function CommitPanel({
-  message, onMessageChange, onCommit, onPush, onPull,
+  message, onMessageChange, onCommit, onPush, onPull, onPullMain,
   busy, stagedCount, ahead, behind, hasRemote,
 }) {
-  const canCommit = message.trim().length > 0 && stagedCount > 0 && !busy
-  const canPush   = hasRemote && ahead > 0 && !busy
-  const canPull   = hasRemote && !busy
+  const canCommit   = message.trim().length > 0 && stagedCount > 0 && !busy
+  const canPush     = hasRemote && ahead > 0 && !busy
+  const canPull     = hasRemote && !busy
+  const canPullMain = hasRemote && !busy
 
   const handleKeyDown = (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && canCommit) onCommit()
@@ -36,14 +37,21 @@ export default function CommitPanel({
         rows={3}
       />
       <div className="commit-actions">
-        <button className="btn btn--commit" onClick={onCommit} disabled={!canCommit}>
+        <button className="btn btn--commit" onClick={onCommit} disabled={!canCommit}
+          title="Commit staged files">
           {busy ? 'Working…' : `Commit${stagedCount > 0 ? ` (${stagedCount})` : ''}`}
         </button>
-        <button className="btn btn--push" onClick={onPush} disabled={!canPush}>
+        <button className="btn btn--push" onClick={onPush} disabled={!canPush}
+          title="Push this branch to origin">
           {busy ? '…' : `Push${ahead > 0 ? ` ↑${ahead}` : ''}`}
         </button>
-        <button className="btn btn--pull" onClick={onPull} disabled={!canPull}>
+        <button className="btn btn--pull" onClick={onPull} disabled={!canPull}
+          title="Pull origin's version of this branch (git pull)">
           {busy ? '…' : `Pull${behind > 0 ? ` ↓${behind}` : ''}`}
+        </button>
+        <button className="btn btn--pull" onClick={onPullMain} disabled={!canPullMain}
+          title="Merge the default branch (main/master) into this branch">
+          {busy ? '…' : 'Merge main'}
         </button>
       </div>
     </div>

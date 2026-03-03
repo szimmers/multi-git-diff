@@ -243,6 +243,21 @@ ipcMain.handle('git:pull', async (_, repoPath) => {
   }
 })
 
+ipcMain.handle('git:pullMain', async (_, repoPath) => {
+  try {
+    const git = simpleGit(repoPath)
+    let defaultBranch = 'main'
+    try {
+      const ref = await git.raw(['symbolic-ref', 'refs/remotes/origin/HEAD', '--short'])
+      defaultBranch = ref.trim().replace(/^origin\//, '')
+    } catch { /* fall back to main */ }
+    const result = await git.pull('origin', defaultBranch)
+    return { ok: true, result, branch: defaultBranch }
+  } catch (err) {
+    return { ok: false, error: err.message }
+  }
+})
+
 // ─── IPC: Open in Araxis ─────────────────────────────────────────────────────
 
 /**

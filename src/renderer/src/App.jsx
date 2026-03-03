@@ -303,6 +303,19 @@ export default function App() {
     } finally { setBusy(false) }
   }, [activeRepo, showToast, refreshStatus])
 
+  const handlePullMain = useCallback(async () => {
+    setBusy(true)
+    try {
+      const result = await window.api.pullMain(activeRepo.path)
+      if (result.ok) {
+        showToast('success', `Merged ${result.branch} into branch`)
+        await refreshStatus(activeRepo)
+      } else {
+        setErrorModal(result.error)
+      }
+    } finally { setBusy(false) }
+  }, [activeRepo, showToast, refreshStatus])
+
   const handleBlameHashClick = useCallback(async (hash, summary) => {
     const result = await window.api.gitShow(activeRepo.path, hash)
     if (!result?.ok) { showToast('error', result?.error || 'git show failed'); return }
@@ -370,6 +383,7 @@ export default function App() {
           onCommit={handleCommit}
           onPush={handlePush}
           onPull={handlePull}
+          onPullMain={handlePullMain}
           busy={busy}
           stagedCount={status.staged.length}
           ahead={status.ahead}
