@@ -226,7 +226,7 @@ ipcMain.handle('git:commit', async (_, repoPath, message) => {
 ipcMain.handle('git:push', async (_, repoPath) => {
   try {
     const git = simpleGit(repoPath)
-    const result = await git.push()
+    const result = await git.push(['origin', 'HEAD'])
     return { ok: true, result }
   } catch (err) {
     return { ok: false, error: err.message }
