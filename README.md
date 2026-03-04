@@ -19,6 +19,15 @@ A macOS desktop app for reviewing and committing git changes across multiple rep
 - **Resizable columns** — drag dividers between sidebar, file list, and diff pane
 - **Live updates** — file watcher auto-refreshes status when the git index changes
 
+## Screenshots
+
+| | |
+|---|---|
+| ![See unstaged changes](docs/screenshots/diff-see-unstaged-changes.png) | ![See blame](docs/screenshots/diff-see-blame.png) |
+| See unstaged changes | See blame |
+| ![See commit history](docs/screenshots/diff-see-commit-history.png) | ![Configure external tools](docs/screenshots/diff-configure-external-tools.png) |
+| See commit history | Configure external tools |
+
 ## Tech Stack
 
 - [Electron](https://electronjs.org) — desktop shell
