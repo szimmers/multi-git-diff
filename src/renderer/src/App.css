@@ -572,6 +572,16 @@ body {
   flex-shrink: 0;
 }
 
+.commit-no-verify {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--subtext);
+  cursor: pointer;
+  user-select: none;
+}
+
 .btn {
   border: none;
   border-radius: 6px;

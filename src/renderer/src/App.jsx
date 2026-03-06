@@ -64,6 +64,7 @@ export default function App() {
   const [commitView, setCommitView]     = useState(null)  // { hash, summary }
   const [commitDiff, setCommitDiff]     = useState('')
   const [commitMessage, setCommitMessage] = useState('')
+  const [noVerify, setNoVerify]           = useState(false)
   const [busy, setBusy]                 = useState(false)
   const [toast, setToast]               = useState(null)
   const [errorModal, setErrorModal]     = useState(null)  // string | null
@@ -294,7 +295,7 @@ export default function App() {
     if (!status.staged.length) { showToast('error', 'Nothing staged to commit'); return }
     setBusy(true)
     try {
-      const result = await window.api.commit(activeRepo.path, commitMessage)
+      const result = await window.api.commit(activeRepo.path, commitMessage, noVerify)
       if (result.ok) {
         setCommitMessage('')
         showToast('success', 'Committed')
@@ -305,7 +306,7 @@ export default function App() {
         setErrorModal(result.error)
       }
     } finally { setBusy(false) }
-  }, [activeRepo, commitMessage, status.staged.length, showToast, refreshStatus])
+  }, [activeRepo, commitMessage, noVerify, status.staged.length, showToast, refreshStatus])
 
   const handlePush = useCallback(async () => {
     setBusy(true)
@@ -517,6 +518,8 @@ export default function App() {
           ahead={status.ahead}
           behind={status.behind}
           hasRemote={!!status.tracking}
+          noVerify={noVerify}
+          onNoVerifyChange={setNoVerify}
         />
       </div>
 

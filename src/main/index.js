@@ -230,10 +230,11 @@ ipcMain.handle('git:unstageAll', async (_, repoPath) => {
 
 // ─── IPC: Commit / Push ──────────────────────────────────────────────────────
 
-ipcMain.handle('git:commit', async (_, repoPath, message) => {
+ipcMain.handle('git:commit', async (_, repoPath, message, noVerify) => {
   try {
     const git = simpleGit(repoPath)
-    const result = await git.commit(message)
+    const options = noVerify ? ['--no-verify'] : []
+    const result = await git.commit(message, options)
     return { ok: true, result }
   } catch (err) {
     return { ok: false, error: err.message }

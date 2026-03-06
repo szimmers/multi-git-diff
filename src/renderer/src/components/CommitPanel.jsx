@@ -11,11 +11,13 @@
  * @param {number}   props.stagedCount - number of staged files; shown on Commit button
  * @param {number}   props.ahead       - unpushed commits; shown on Push button
  * @param {number}   props.behind      - unpulled commits; shown on Pull button
- * @param {boolean}  props.hasRemote   - whether the branch has a tracking remote
+ * @param {boolean}  props.hasRemote       - whether the branch has a tracking remote
+ * @param {boolean}  props.noVerify        - pass --no-verify to git commit
+ * @param {(v:boolean)=>void} props.onNoVerifyChange
  */
 export default function CommitPanel({
   message, onMessageChange, onCommit, onPush, onPull, onPullMain,
-  busy, stagedCount, ahead, behind, hasRemote,
+  busy, stagedCount, ahead, behind, hasRemote, noVerify, onNoVerifyChange,
 }) {
   const canCommit   = message.trim().length > 0 && stagedCount > 0 && !busy
   const canPush     = hasRemote && ahead > 0 && !busy
@@ -38,6 +40,15 @@ export default function CommitPanel({
         rows={3}
       />
       <div className="commit-actions">
+        <label className="commit-no-verify">
+          <input
+            type="checkbox"
+            checked={!!noVerify}
+            onChange={e => onNoVerifyChange(e.target.checked)}
+            disabled={busy}
+          />
+          --no-verify
+        </label>
         <button className="btn btn--commit" onClick={onCommit} disabled={!canCommit}
           title="Commit staged files">
           {busy ? 'Working…' : `Commit${stagedCount > 0 ? ` (${stagedCount})` : ''}`}
