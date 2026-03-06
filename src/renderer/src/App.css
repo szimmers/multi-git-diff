@@ -451,6 +451,19 @@ body {
 }
 .araxis-btn:hover { color: var(--accent); border-color: var(--accent); background: rgba(109, 40, 217, 0.06); }
 
+.copy-path-btn {
+  background: none;
+  border: none;
+  color: var(--subtext);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  opacity: 0.5;
+  transition: opacity 0.1s, color 0.1s;
+}
+.copy-path-btn:hover { opacity: 1; color: var(--accent); }
+
 .back-btn {
   background: none;
   border: none;

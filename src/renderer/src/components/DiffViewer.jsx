@@ -157,6 +157,11 @@ export default function DiffViewer({
     <div className="diff-viewer">
       <div className="diff-header">
         <span className="diff-filename" title={selectedFile.path}>{selectedFile.path}</span>
+        <button
+          className="copy-path-btn"
+          onClick={() => navigator.clipboard.writeText(selectedFile.path)}
+          title="Copy path to clipboard"
+        >⎘</button>
         <span className="diff-badge">{selectedFile.isStaged ? 'STAGED' : 'UNSTAGED'}</span>
         {canBlame && (
           <button
