@@ -53,8 +53,10 @@ function BlameView({ lines, onHashClick }) {
  * @param {string}   props.commitDiff       - raw git show output
  * @param {()=>void} props.onClearCommitView
  */
+const IMAGE_EXTS = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'ico', 'bmp'])
+
 export default function DiffViewer({
-  diff, selectedFile, externalButtons = [],
+  diff, selectedFile, repoPath, externalButtons = [],
   blameOn, blameData, onToggleBlame, onBlameHashClick,
   commitView, commitDiff, onClearCommitView,
   stashView, stashDiff, onClearStashView, onStashPop, busy,
@@ -64,7 +66,11 @@ export default function DiffViewer({
 
   const diffHtml = useMemo(() => {
     if (!diff) return ''
-    return toDiffHtml(diff, { drawFileList: false, matching: 'lines', outputFormat: 'line-by-line' })
+    try {
+      return toDiffHtml(diff, { drawFileList: false, matching: 'lines', outputFormat: 'line-by-line' })
+    } catch {
+      return ''
+    }
   }, [diff])
 
   const commitDiffHtml = useMemo(() => {
@@ -94,6 +100,19 @@ export default function DiffViewer({
     setHashCopied(true)
     setTimeout(() => setHashCopied(false), 1500)
   }
+
+  const [imageSrc, setImageSrc] = useState(null)
+  useEffect(() => {
+    const ext = selectedFile?.path.split('.').pop()?.toLowerCase()
+    if (!selectedFile || !IMAGE_EXTS.has(ext) || !repoPath) { setImageSrc(null); return }
+    try {
+      window.api.readImageAsDataUrl(`${repoPath}/${selectedFile.path}`)
+        .then(src => setImageSrc(src ?? null))
+        .catch(() => setImageSrc(null))
+    } catch {
+      setImageSrc(null)
+    }
+  }, [selectedFile, repoPath])
 
   // Stash view
   if (stashView) {
@@ -152,6 +171,8 @@ export default function DiffViewer({
   }
 
   const canBlame = selectedFile.status !== '?'
+  const ext = selectedFile.path.split('.').pop()?.toLowerCase()
+  const isImage = IMAGE_EXTS.has(ext)
 
   return (
     <div className="diff-viewer">
@@ -177,11 +198,18 @@ export default function DiffViewer({
         ))}
       </div>
 
-      {blameOn
-        ? <BlameView lines={blameData} onHashClick={onBlameHashClick} />
-        : diffHtml
-          ? <div ref={diffRef} className="diff-content" dangerouslySetInnerHTML={{ __html: diffHtml }} />
-          : <div className="diff-viewer diff-viewer--empty"><span className="diff-placeholder">No diff available</span></div>
+      {isImage
+        ? <div className="diff-image-preview">
+            {imageSrc
+              ? <img src={imageSrc} alt={selectedFile.path} />
+              : <span className="diff-placeholder">Loading image…</span>
+            }
+          </div>
+        : blameOn
+          ? <BlameView lines={blameData} onHashClick={onBlameHashClick} />
+          : diffHtml
+            ? <div ref={diffRef} className="diff-content" dangerouslySetInnerHTML={{ __html: diffHtml }} />
+            : <div className="diff-viewer diff-viewer--empty"><span className="diff-placeholder">No diff available</span></div>
       }
     </div>
   )

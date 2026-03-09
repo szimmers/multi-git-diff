@@ -339,6 +339,17 @@ ipcMain.handle('git:stashPop', async (_, repoPath, ref) => {
 
 // ─── IPC: Open in Araxis ─────────────────────────────────────────────────────
 
+ipcMain.handle('fs:readImageAsDataUrl', (_, filePath) => {
+  try {
+    const data = readFileSync(filePath)
+    const ext = filePath.split('.').pop().toLowerCase()
+    const mime = ext === 'svg' ? 'image/svg+xml' : `image/${ext === 'jpg' ? 'jpeg' : ext}`
+    return `data:${mime};base64,${data.toString('base64')}`
+  } catch {
+    return null
+  }
+})
+
 ipcMain.handle('settings:get', () => {
   const saved = readSettings()
   return {

@@ -214,6 +214,26 @@ export default function App() {
     setSelectedFile(file)
   }, [])
 
+  // Keyboard navigation through file list
+  useEffect(() => {
+    if (!selectedFile) return
+    const handler = (e) => {
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return
+      if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return
+      e.preventDefault()
+      const allFiles = [
+        ...status.staged.map(f => ({ ...f, isStaged: true })),
+        ...status.unstaged.map(f => ({ ...f, isStaged: false })),
+      ]
+      const idx = allFiles.findIndex(f => f.path === selectedFile.path && f.isStaged === selectedFile.isStaged)
+      if (idx === -1) return
+      const next = e.key === 'ArrowDown' ? allFiles[idx + 1] : allFiles[idx - 1]
+      if (next) handleSelectFile(next)
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [selectedFile, status, handleSelectFile])
+
   // ─── Workspace handlers ──────────────────────────────────────────────────────
   const handleAddWorkspace = useCallback(async () => {
     const updated = await window.api.addWorkspace()
@@ -487,6 +507,7 @@ export default function App() {
         <DiffViewer
           diff={diff}
           selectedFile={selectedFile}
+          repoPath={activeRepo?.path}
           externalButtons={[
             settings.araxis?.installed     && settings.araxis?.enabled     && { label: 'Open in Araxis ↗',     onClick: handleOpenAraxis },
             settings.sublime?.installed    && settings.sublime?.enabled    && { label: 'Open in Sublime ↗',    onClick: handleOpenSublime },

@@ -27,7 +27,8 @@ contextBridge.exposeInMainWorld('api', {
   openSourcetree: (repoPath)                   => ipcRenderer.invoke('git:openSourcetree', repoPath),
   getBlame:    (repoPath, filePath)          => ipcRenderer.invoke('git:blame',      repoPath, filePath),
   gitShow:     (repoPath, hash)             => ipcRenderer.invoke('git:show',       repoPath, hash),
-  showFileMenu:(repoPath, filePath, status)  => ipcRenderer.invoke('git:fileMenu',   repoPath, filePath, status),
+  showFileMenu:      (repoPath, filePath, status) => ipcRenderer.invoke('git:fileMenu',            repoPath, filePath, status),
+  readImageAsDataUrl:(filePath)                   => ipcRenderer.invoke('fs:readImageAsDataUrl',   filePath),
   watch:       (repoPath)                    => ipcRenderer.invoke('git:watch',      repoPath),
   unwatch:     (repoPath)                    => ipcRenderer.invoke('git:unwatch',    repoPath),
 
