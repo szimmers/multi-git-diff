@@ -28,6 +28,7 @@ contextBridge.exposeInMainWorld('api', {
   getBlame:    (repoPath, filePath)          => ipcRenderer.invoke('git:blame',      repoPath, filePath),
   gitShow:     (repoPath, hash)             => ipcRenderer.invoke('git:show',       repoPath, hash),
   showFileMenu:      (repoPath, filePath, status) => ipcRenderer.invoke('git:fileMenu',            repoPath, filePath, status),
+  discardFiles:      (repoPath, files)            => ipcRenderer.invoke('git:discardFiles',        repoPath, files),
   readImageAsDataUrl:(filePath)                   => ipcRenderer.invoke('fs:readImageAsDataUrl',   filePath),
   watch:       (repoPath)                    => ipcRenderer.invoke('git:watch',      repoPath),
   unwatch:     (repoPath)                    => ipcRenderer.invoke('git:unwatch',    repoPath),

@@ -358,6 +358,25 @@ export default function App() {
 
   const handleClearSelection = useCallback(() => setStashSelection(new Set()), [])
 
+  const handleSelectAllUnstaged = useCallback(() => {
+    setStashSelection(new Set(status.unstaged.map(f => f.path)))
+  }, [status.unstaged])
+
+  const handleDiscardSelected = useCallback(async () => {
+    const filesToDiscard = stashSelection.size > 0
+      ? status.unstaged.filter(f => stashSelection.has(f.path))
+      : status.unstaged
+    if (!filesToDiscard.length) return
+    const result = await window.api.discardFiles(activeRepo.path, filesToDiscard)
+    if (result.ok) {
+      setStashSelection(new Set())
+      showToast('success', `Discarded ${filesToDiscard.length} file(s)`)
+      await refreshStatus(activeRepo)
+    } else if (!result.cancelled) {
+      showToast('error', result.error || 'Discard failed')
+    }
+  }, [activeRepo, stashSelection, status.unstaged, showToast, refreshStatus])
+
   const handleToggleStashSelect = useCallback((filePath) => {
     setStashSelection(prev => {
       const next = new Set(prev)
@@ -498,6 +517,8 @@ export default function App() {
         onStash={handleStash}
         onStageSelected={handleStageSelected}
         onClearSelection={handleClearSelection}
+        onSelectAll={handleSelectAllUnstaged}
+        onDiscard={handleDiscardSelected}
         style={{ width: filelistWidth }}
       />
 

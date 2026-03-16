@@ -12,7 +12,7 @@ function FileItem({ file, isStaged, isSelected, onSelect, onAction, onContextMen
           checked={stashSelected}
           onChange={() => onToggleStashSelect(file.path)}
           onClick={e => e.stopPropagation()}
-          title="Select for stashing"
+          title="Select for stash / stage / discard"
         />
       )}
       <span className="file-status" data-s={file.status}>{file.status}</span>
@@ -48,12 +48,14 @@ function FileItem({ file, isStaged, isSelected, onSelect, onAction, onContextMen
 export default function FileList({
   staged, unstaged, selectedFile,
   onSelectFile, onStage, onUnstage, onStageAll, onUnstageAll, onFileMenu,
-  stashSelection, onToggleStashSelect, onStash, onStageSelected, onClearSelection, style,
+  stashSelection, onToggleStashSelect, onStash, onStageSelected, onClearSelection,
+  onSelectAll, onDiscard, style,
 }) {
   const selCount   = stashSelection?.size ?? 0
   const canStash   = selCount > 0 || staged.length > 0 || unstaged.length > 0
   const stashLabel = selCount > 0 ? `Stash (${selCount})` : 'Stash All'
   const stageLabel = selCount > 0 ? `Stage (${selCount})` : 'Stage All'
+  const allSelected = unstaged.length > 0 && selCount === unstaged.length
   return (
     <div className="file-list" style={style}>
       {/* Staged */}
@@ -86,8 +88,26 @@ export default function FileList({
         <div className="file-section__header">
           <span>Unstaged <span className="count">({unstaged.length})</span></span>
           <div style={{ display: 'flex', gap: 4 }}>
-            {selCount > 0 && (
+            {unstaged.length > 0 && (
+              <button
+                className="section-btn"
+                onClick={allSelected ? onClearSelection : onSelectAll}
+                title={allSelected ? 'Deselect all' : 'Select all unstaged files'}
+              >
+                {allSelected ? 'Deselect All' : 'Select All'}
+              </button>
+            )}
+            {selCount > 0 && !allSelected && (
               <button className="section-btn" onClick={onClearSelection} title="Clear selection">✕</button>
+            )}
+            {unstaged.length > 0 && (
+              <button
+                className="section-btn section-btn--danger"
+                onClick={onDiscard}
+                title={selCount > 0 ? `Discard changes to ${selCount} file(s)` : 'Discard all unstaged changes'}
+              >
+                {selCount > 0 ? `Discard (${selCount})` : 'Discard All'}
+              </button>
             )}
             {canStash && (
               <button className="section-btn section-btn--stash" onClick={onStash}

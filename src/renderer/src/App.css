@@ -290,6 +290,7 @@ body {
 }
 .section-btn:hover { color: var(--accent); border-color: var(--accent); background: rgba(109, 40, 217, 0.06); }
 .section-btn--stash:hover { color: var(--orange); border-color: var(--orange); background: rgba(180, 83, 9, 0.06); }
+.section-btn--danger:hover { color: var(--red); border-color: var(--red); background: rgba(153, 27, 27, 0.06); }
 
 .file-section__body {
   overflow-y: auto;

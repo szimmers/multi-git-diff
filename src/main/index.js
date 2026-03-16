@@ -513,6 +513,45 @@ ipcMain.handle('git:fileMenu', (_, repoPath, filePath, status) => {
   })
 })
 
+// ─── IPC: Discard files ───────────────────────────────────────────────────────
+
+/**
+ * Reverts tracked files and deletes untracked files in bulk, with a confirmation dialog.
+ * @param {string} repoPath
+ * @param {{ path: string, status: string }[]} files
+ */
+ipcMain.handle('git:discardFiles', async (_, repoPath, files) => {
+  const tracked   = files.filter(f => f.status !== '?')
+  const untracked = files.filter(f => f.status === '?')
+
+  const detail = [
+    tracked.length   ? `${tracked.length} tracked file(s) will be reverted.`                     : '',
+    untracked.length ? `${untracked.length} untracked file(s) will be permanently deleted.` : '',
+  ].filter(Boolean).join('\n')
+
+  const { response } = await dialog.showMessageBox(mainWindow, {
+    type: 'warning',
+    buttons: ['Discard', 'Cancel'],
+    defaultId: 1,
+    message: `Discard changes to ${files.length} file(s)?`,
+    detail,
+  })
+  if (response !== 0) return { ok: false, cancelled: true }
+
+  try {
+    if (tracked.length) {
+      const git = simpleGit(repoPath)
+      await git.checkout(['--', ...tracked.map(f => f.path)])
+    }
+    for (const f of untracked) {
+      rmSync(join(repoPath, f.path), { recursive: true, force: true })
+    }
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, error: err.message }
+  }
+})
+
 // ─── IPC: Show commit ────────────────────────────────────────────────────────
 
 ipcMain.handle('git:show', async (_, repoPath, hash) => {
